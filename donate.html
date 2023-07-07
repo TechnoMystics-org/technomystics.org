@@ -24,6 +24,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" integrity="sha512-8Q6Y9XnTbOE+JNvjBQwJ2H8S+UV4uA6hiRykhdtIyDYZ2TprdNmWOUaKdGzOhyr4dCyk287OejbPvwl7lrfqrQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <style>
       .bd-placeholder-img {
@@ -119,43 +120,48 @@
           <small id="connect-error" class="text-danger"></small>
         </div>
 
+        <div class="row justify-content-center">
+          <div class="col-4">
+
+
         
-        <div class="container px-4 py-5" id="donate-form-card">
-          <div class="card text-bg-dark text-fg-light text-start" style="width: 18rem;">
-            <div class="card-body">
+            <div class="container px-4 py-5" id="donate-form-card">
+              <div class="card text-bg-dark text-fg-light text-start" style="width: 18rem;">
+                <div class="card-body">
 
-              <form>
-                <div class="mb-3">
-                  <label for="selectToken" class="form-label">MATIC/DAI</label>
-                  <select class="form-select" aria-label="Select Token to Donate" id="select-token" onChange="selectToken();"> 
-                    <option value="null" selected>Select Token</option>
-                    <option value="matic">MATIC</option>
-                    <option value="dai">DAI</option>
-                  </select>
+                  <form>
+                    <div class="mb-3">
+                      <label for="selectToken" class="form-label">MATIC/DAI</label>
+                      <select class="form-select" aria-label="Select Token to Donate" id="select-token" onChange="selectToken();"> 
+                        <option value="null" selected>Select Token</option>
+                        <option value="matic">MATIC</option>
+                        <option value="dai">DAI</option>
+                      </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label for="donation-amount" class="form-label">Amount</label>
+                      <div class="input-group">
+                        <input type="number" class="form-control" id="donation-amount">
+                        <button class="btn btn-outline-secondary" type="button" onClick="setMaxDonation();">MAX</button>
+                      </div>
+                      <small id="max-amount" class="text-secondary"></small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Donate</button>
+
+                    <small id="donate-error" class="text-danger"></small>
+                  </form>
+
                 </div>
-
-                <div class="mb-3">
-                  <label for="donationAmount" class="form-label">Amount</label>
-                  <div class="input-group">
-                    <input type="number" class="form-control" id="donation-amount">
-                    <button class="btn btn-outline-secondary" type="button" onClick="setMaxDonation();">MAX</button>
-                  </div>
-                  <small id="max-amount" class="text-secondary"></small>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">Donate</button>
-
-                <small id="donate-error" class="text-danger"></small>
-              </form>
-
-
-
+              </div>
             </div>
+
+
           </div>
         </div>
-        
-        
-      
+
+
         <div class="b-example-divider"></div>
         
       

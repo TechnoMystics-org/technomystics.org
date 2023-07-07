@@ -4,24 +4,64 @@ var contract;
 var DAIBalance;
 var MATICBalance;
 
-const DAIContractAddress = "0x6b175474e89094c44da98b954eedeac495271d0f"
+const DAIContractAddress = "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063";
+
+// ABI for getting ERC20 Balance
+const minABI = [
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "_owner",
+        type: "address",
+      },
+    ],
+    name: "balanceOf",
+    outputs: [
+      {
+        name: "balance",
+        type: "uint256",
+      },
+    ],
+    payable: false,
+    type: "function",
+  },
+];
 
 function setMaxDonation() {
-  if(MATICBalance >= 0) {
-    // round balance to 4 decimals
-    matic = Math.round(MATICBalance * 10000) / 10000;
-    document.getElementById('donation-amount').value = ''+matic;
+  selectVal = document.getElementById('select-token').value;
+  if(selectVal !== 'null'){
+    if(selectVal == 'matic'){
+      if (MATICBalance > 0){
+        matic = Math.round(MATICBalance * 10000) / 10000;
+        document.getElementById('donation-amount').value = matic;
+      }
+    }
+    else if(selectVal == 'dai'){
+      if(DAIBalance > 0){
+        dai = Math.round(DAIBalance * 10000) / 10000;
+        document.getElementById('donation-amount').value = dai;
+      }
+    }
+  }
+  else{
+    document.getElementById('donation-amount').value = 0;
   }
 }
 
 function selectToken() {
   //get selection
   selectVal = document.getElementById('select-token').value;
+  document.getElementById('donation-amount').value = 0;
 
   // Choose logic based on token
   if(selectVal == 'matic'){
     matic = Math.round(MATICBalance * 10000) / 10000;
     document.getElementById('max-amount').innerHTML = "Max Amount: "+matic;
+  }
+  else if(selectVal == 'dai') {
+    dai = Math.round(DAIBalance * 10000) / 10000;
+    document.getElementById('max-amount').innerHTML = "Max Amount: "+dai;
   }
   else if(selectVal == 'null') {
     matic = Math.round(MATICBalance * 10000) / 10000;
@@ -106,6 +146,14 @@ async function connectWallet(){
                 console.log("MATIC Balance: "+MATICBalance);
             });
 
+            // get DAI Balance
+            DAIcontract = new web3.eth.Contract(minABI, DAIContractAddress);
+            DAIBalance = await DAIcontract.methods.balanceOf(accounts[0]).call();
+            DAIBalance = web3.utils.fromWei(DAIBalance,"ether");
+            console.log("DAI Balance: "+DAIBalance);
+
+
+
             // select Token
             selectToken();
             
@@ -118,9 +166,15 @@ async function connectWallet(){
     }
 }
 
+function getSafePolygonStats(){
+  $.ajax({url:'/api/polygonscan.php', success: function(result){
+    console.log(result);
+  }});
+}
 
 
 window.addEventListener('load', 
   function() { 
     document.getElementById('donate-form-card').style.display = 'none';
+    getSafePolygonStats();
   }, false);
