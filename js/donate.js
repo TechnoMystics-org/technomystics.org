@@ -3,6 +3,7 @@ var web3;
 var contract;
 var DAIBalance;
 var MATICBalance;
+var DAIcontract;
 
 const DAIContractAddress = "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063";
 const TMSafeAddress = "0xddF18000aba4e7EDBa1fc87a089B36051C83Eb27";
@@ -27,41 +28,107 @@ const minABI = [
     payable: false,
     type: "function",
   },
+  {
+    constant: false,
+    inputs: [
+     {
+      name: "_to",
+      type: "address"
+     },
+     {
+      name: "_value",
+      type: "uint256"
+     }
+    ],
+    name: "transfer",
+    outputs: [
+     {
+      name: "",
+      type: "bool"
+     }
+    ],
+    type: "function"
+   },
 ];
 
 async function sendDonation(){
   //console.log("Sending Donation: "+document.getElementById('donation-amount').value);
   document.getElementById('donate-error').innerHTML = "";
   if(document.getElementById('donation-amount').value > 0){
-    donationAmount = document.getElementById('donation-amount').value;
-    try {
-      await web3.eth.sendTransaction({
-        from:accounts[0],
-        to:TMSafeAddress,
-        value:web3.utils.toWei(donationAmount,"ether"),
-      })
-      .on('error', function(err){
-        console.log('error:');
-        console.log(err);
-      })
-      .on('transactionHash', function(transactionHash){
-        //console.log("txHash:");
-        //console.log(transactionHash);
-        document.getElementById('donate-error').innerHTML = "<small class=\"text-success\"><a href=\"https://polygonscan.com/tx/"+transactionHash+"\" target=\"_blank\" class=\"link-light\">"+transactionHash+"</a> Submitted.";
-        document.getElementById('donation-amount').value = 0;
-        document.getElementById('donate-button').disabled = true;
-      })
-      .on('receipt',function(receipt){
-        //console.log("Receipt:");
-        //console.log(receipt);
-        document.getElementById('donate-error').innerHTML = "<small class=\"text-success\"><a href=\"https://polygonscan.com/tx/"+receipt.transactionHash+"\" target=\"_blank\" class=\"link-light\">"+receipt.transactionHash+"</a> Success!";
-      });
+    // Check for MATIC or DAI
+    if(document.getElementById('select-token').value == 'null'){
+      // Do Nothing
     }
-    catch(e){
-      console.log(e.message);
-      document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+e.message+"</small>";
+    else if(document.getElementById('select-token').value == 'matic'){
+      donationAmount = document.getElementById('donation-amount').value;
+      try {
+        await web3.eth.sendTransaction({
+          from:accounts[0],
+          to:TMSafeAddress,
+          value:web3.utils.toWei(donationAmount,"ether"),
+        })
+        .on('error', function(err){
+          console.log('error:');
+          console.log(err);
+        })
+        .on('transactionHash', function(transactionHash){
+          //console.log("txHash:");
+          //console.log(transactionHash);
+          document.getElementById('donate-error').innerHTML = "<small class=\"text-success\"><a href=\"https://polygonscan.com/tx/"+transactionHash+"\" target=\"_blank\" class=\"link-light\">"+transactionHash+"</a> Submitted.";
+          document.getElementById('donation-amount').value = 0;
+          document.getElementById('donate-button').disabled = true;
+        })
+        .on('receipt',function(receipt){
+          //console.log("Receipt:");
+          //console.log(receipt);
+          document.getElementById('donate-error').innerHTML = "<small class=\"text-success\"><a href=\"https://polygonscan.com/tx/"+receipt.transactionHash+"\" target=\"_blank\" class=\"link-light\">"+receipt.transactionHash+"</a> Success!";
+        });
+      }
+      catch(e){
+        console.log(e.message);
+        document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+e.message+"</small>";
+      }
     }
-    
+    else if(document.getElementById('select-token').value == 'dai'){
+      console.log("DAI Donation Amount: "+document.getElementById('donation-amount').value);
+      try{
+        donationAmount = web3.utils.toWei(document.getElementById('donation-amount').value,"ether");
+        DAIContract = new web3.eth.Contract(minABI,DAIContractAddress, {from: accounts[0],});
+
+        rawTx = {
+          from: accounts[0],
+          to: DAIContractAddress,
+          data: DAIContract.methods.transfer(TMSafeAddress, donationAmount).encodeABI(),
+        }
+
+        await web3.eth.sendTransaction({
+          from: accounts[0],
+          to: DAIContractAddress,
+          data: DAIContract.methods.transfer(TMSafeAddress, donationAmount).encodeABI(),
+        })
+        .on('error',  function(err){
+          console.log('error:');
+          console.log(err);
+        })
+        .on('transactionHash', function(transactionHash){
+          //console.log("txHash:");
+          //console.log(transactionHash);
+          document.getElementById('donate-error').innerHTML = "<small class=\"text-success\"><a href=\"https://polygonscan.com/tx/"+transactionHash+"\" target=\"_blank\" class=\"link-light\">"+transactionHash+"</a> Submitted.";
+          document.getElementById('donation-amount').value = 0;
+          document.getElementById('donate-button').disabled = true;
+        })
+        .on('receipt',function(receipt){
+          //console.log("Receipt:");
+          //console.log(receipt);
+          document.getElementById('donate-error').innerHTML = "<small class=\"text-success\"><a href=\"https://polygonscan.com/tx/"+receipt.transactionHash+"\" target=\"_blank\" class=\"link-light\">"+receipt.transactionHash+"</a> Success!";
+        });
+      }
+      catch(e){
+        console.log(e.message);
+        document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+e.message+"</small>";
+      }
+      
+    }
   }
 }
 
@@ -204,7 +271,6 @@ async function connectWallet(){
           DAIcontract = new web3.eth.Contract(minABI, DAIContractAddress);
           DAIBalance = await DAIcontract.methods.balanceOf(accounts[0]).call();
           DAIBalance = web3.utils.fromWei(DAIBalance,"ether");
-          //console.log("DAI Balance: "+DAIBalance);
 
           // select Token
           selectToken();
