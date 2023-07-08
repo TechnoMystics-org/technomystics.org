@@ -129,7 +129,6 @@
               <div class="card text-bg-dark text-fg-light text-start" style="width: 18rem;">
                 <div class="card-body">
 
-                  <form>
                     <div class="mb-3">
                       <label for="selectToken" class="form-label">MATIC/DAI</label>
                       <select class="form-select" aria-label="Select Token to Donate" id="select-token" onChange="selectToken();"> 
@@ -142,16 +141,15 @@
                     <div class="mb-3">
                       <label for="donation-amount" class="form-label">Amount</label>
                       <div class="input-group">
-                        <input type="number" class="form-control" id="donation-amount">
+                        <input type="number" class="form-control" id="donation-amount" onChange="donationAmountChange();">
                         <button class="btn btn-outline-secondary" type="button" onClick="setMaxDonation();">MAX</button>
                       </div>
                       <small id="max-amount" class="text-secondary"></small>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">Donate</button>
-
+                    <button class="btn btn-primary" id="donate-button" onClick="sendDonation();">Donate</button>
+                    <br>
                     <small id="donate-error" class="text-danger"></small>
-                  </form>
 
                 </div>
               </div>
@@ -161,6 +159,56 @@
           </div>
         </div>
 
+        <hr>
+
+        <div class="row justify-content-center">
+          <div class="col-4">
+            <h3>Current Safe Balance</h3>
+          </div>
+        </div>
+
+
+        <div class="row justify-content-center">
+          <div class="col-4">
+            <img src="/img/matic_icon.png" width="50px">
+          </div>
+          <div class="col-4">
+            <img src="/img/dai_icon.png" width="50px">
+          </div>
+        </div>
+
+        <div class="row justify-content-center">
+          <div class="col-4" id="matic-safe-balance">
+            <!-- <h3>22.1234</h3>-->
+          </div>
+          <div class="col-4" id="dai-safe-balance">
+            <!-- <h3>1.2345</h3> -->
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="row justify-content-center">
+          <div class="col-4">
+            <h3>Recent Donations</h3>
+          </div>
+        </div>
+
+        <div class="row justify-content-center">
+          <div class="col-4">
+            <h4>Amount</h4>
+          </div>
+          <div class="col-4">
+            <h4>From</h4>
+          </div>
+          <div class="col-4">
+            <h4>On</h4>
+          </div>
+        </div>
+
+        <div id="recent-transactions">
+         
+        </div>
 
         <div class="b-example-divider"></div>
         
