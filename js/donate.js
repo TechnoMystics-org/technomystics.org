@@ -70,6 +70,7 @@ async function sendDonation(){
         .on('error', function(err){
           console.log('error:');
           console.log(err);
+          document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+err.data.message+"</small>";
         })
         .on('transactionHash', function(transactionHash){
           //console.log("txHash:");
@@ -85,8 +86,7 @@ async function sendDonation(){
         });
       }
       catch(e){
-        console.log(e.message);
-        document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+e.message+"</small>";
+        document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+e.data.message+"</small>";
       }
     }
     else if(document.getElementById('select-token').value == 'dai'){
@@ -109,6 +109,7 @@ async function sendDonation(){
         .on('error',  function(err){
           console.log('error:');
           console.log(err);
+          document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+err.data.message+"</small>";
         })
         .on('transactionHash', function(transactionHash){
           //console.log("txHash:");
@@ -125,7 +126,7 @@ async function sendDonation(){
       }
       catch(e){
         console.log(e.message);
-        document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+e.message+"</small>";
+        document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+e.data.message+"</small>";
       }
       
     }
@@ -239,43 +240,40 @@ async function connectWallet(){
           accounts = await window.ethereum.request({
               method: 'eth_requestAccounts',
           });
+
+          switchError = await switchNetwork();
+          if(!switchError){
+            document.getElementById('connect-button-div').style.display = 'none';
+            document.getElementById('donate-form-card').style.display = 'block';
+            window.ethereum.on('chainChanged', (chainId) => {
+                if(chainId !== '0x89'){
+                    window.location.reload();
+                }
+            });
+
+            // get MATIC Balance
+            await web3.eth.getBalance(accounts[0]).then((res,er) => {
+                //console.log(res);
+                //console.log(er);
+
+                MATICBalance = web3.utils.fromWei(res, "ether");
+                //console.log("MATIC Balance: "+MATICBalance);
+            });
+
+            // get DAI Balance
+            DAIcontract = new web3.eth.Contract(minABI, DAIContractAddress);
+            DAIBalance = await DAIcontract.methods.balanceOf(accounts[0]).call();
+            DAIBalance = web3.utils.fromWei(DAIBalance,"ether");
+
+            // select Token
+            selectToken();
+          }
       }
       catch(e){
-          //console.log(e.message);
+          console.log(e.message);
           document.getElementById("connect-error").innerHTML = e.message;
           didError = true;
       }
-      
-      //console.log('Accounts requested from MetaMask RPC: ', accounts);
-      didError = await switchNetwork();
-
-      if(!didError){
-          document.getElementById('connect-button-div').style.display = 'none';
-          document.getElementById('donate-form-card').style.display = 'block';
-          window.ethereum.on('chainChanged', (chainId) => {
-              if(chainId !== '0x89'){
-                  window.location.reload();
-              }
-          });
-
-          // get MATIC Balance
-          await web3.eth.getBalance(accounts[0]).then((res,er) => {
-              //console.log(res);
-              //console.log(er);
-
-              MATICBalance = web3.utils.fromWei(res, "ether");
-              //console.log("MATIC Balance: "+MATICBalance);
-          });
-
-          // get DAI Balance
-          DAIcontract = new web3.eth.Contract(minABI, DAIContractAddress);
-          DAIBalance = await DAIcontract.methods.balanceOf(accounts[0]).call();
-          DAIBalance = web3.utils.fromWei(DAIBalance,"ether");
-
-          // select Token
-          selectToken();
-          
-      }        
     } else {
         // If web3 is not available, give instructions to install MetaMask
         document.getElementById('connect-error').innerHTML = 'Please install MetaMask or compatible wallet to connect to the Ethereum network.';
@@ -295,7 +293,7 @@ function getSafePolygonStats(){
 
 function printTransactions(item, index){
   // Only list the last 30 transactions
-  if(index <= 30){
+  //if(index <= 30){
     // Determine token
     icon_src = "";
     if(item.token == 'matic'){
@@ -327,7 +325,7 @@ function printTransactions(item, index){
     </div>`;
     // Publish
     $('#recent-transactions').append(row);
-  }
+  //}
 }
 
 window.addEventListener('load', 
