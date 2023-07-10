@@ -52,7 +52,6 @@ const minABI = [
 ];
 
 async function sendDonation(){
-  //console.log("Sending Donation: "+document.getElementById('donation-amount').value);
   document.getElementById('donate-error').innerHTML = "";
   if(document.getElementById('donation-amount').value > 0){
     // Check for MATIC or DAI
@@ -68,20 +67,14 @@ async function sendDonation(){
           value:web3.utils.toWei(donationAmount,"ether"),
         })
         .on('error', function(err){
-          console.log('error:');
-          console.log(err);
           document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+err.data.message+"</small>";
         })
         .on('transactionHash', function(transactionHash){
-          //console.log("txHash:");
-          //console.log(transactionHash);
           document.getElementById('donate-error').innerHTML = "<small class=\"text-success\"><a href=\"https://polygonscan.com/tx/"+transactionHash+"\" target=\"_blank\" class=\"link-light\">"+transactionHash+"</a> Submitted.";
           document.getElementById('donation-amount').value = 0;
           document.getElementById('donate-button').disabled = true;
         })
         .on('receipt',function(receipt){
-          //console.log("Receipt:");
-          //console.log(receipt);
           document.getElementById('donate-error').innerHTML = "<small class=\"text-success\"><a href=\"https://polygonscan.com/tx/"+receipt.transactionHash+"\" target=\"_blank\" class=\"link-light\">"+receipt.transactionHash+"</a> Success!";
         });
       }
@@ -90,7 +83,6 @@ async function sendDonation(){
       }
     }
     else if(document.getElementById('select-token').value == 'dai'){
-      console.log("DAI Donation Amount: "+document.getElementById('donation-amount').value);
       try{
         donationAmount = web3.utils.toWei(document.getElementById('donation-amount').value,"ether");
         DAIContract = new web3.eth.Contract(minABI,DAIContractAddress, {from: accounts[0],});
@@ -107,25 +99,18 @@ async function sendDonation(){
           data: DAIContract.methods.transfer(TMSafeAddress, donationAmount).encodeABI(),
         })
         .on('error',  function(err){
-          console.log('error:');
-          console.log(err);
           document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+err.data.message+"</small>";
         })
         .on('transactionHash', function(transactionHash){
-          //console.log("txHash:");
-          //console.log(transactionHash);
           document.getElementById('donate-error').innerHTML = "<small class=\"text-success\"><a href=\"https://polygonscan.com/tx/"+transactionHash+"\" target=\"_blank\" class=\"link-light\">"+transactionHash+"</a> Submitted.";
           document.getElementById('donation-amount').value = 0;
           document.getElementById('donate-button').disabled = true;
         })
         .on('receipt',function(receipt){
-          //console.log("Receipt:");
-          //console.log(receipt);
           document.getElementById('donate-error').innerHTML = "<small class=\"text-success\"><a href=\"https://polygonscan.com/tx/"+receipt.transactionHash+"\" target=\"_blank\" class=\"link-light\">"+receipt.transactionHash+"</a> Success!";
         });
       }
       catch(e){
-        console.log(e.message);
         document.getElementById('donate-error').innerHTML = "<small class=\"text-danger\">"+e.data.message+"</small>";
       }
       
@@ -209,7 +194,10 @@ async function switchNetwork(){
               params: [
                 {
                   chainId: '0x89',
-                  rpcUrl: 'https://polygon-rpc.com',
+                  chainName: 'Polygon Mainnet',
+                  rpcUrls: ['https://polygon-rpc.com'],
+                  blockExplorerUrls: ['https://polygonscan.com'],
+                  nativeCurrency: { name: 'Matic', symbol: 'MATIC', decimals: 18},
                 },
               ],
             });
@@ -219,16 +207,17 @@ async function switchNetwork(){
             errMessage = true;
           }
         }
-        console.error(error);
-        document.getElementById("connect-error").innerHTML = error.message;
-        errMessage = true;
+        else{
+          console.error(error);
+          document.getElementById("connect-error").innerHTML = error.data.message;
+          errMessage = true;
+        }
       }
       return errMessage;
 }
 
 async function connectWallet(){
     document.getElementById("connect-error").innerHTML = '';
-    //console.log("Hello");
     didError = false;
     if (typeof window.ethereum !== 'undefined') {
       // Use the browser injected Ethereum provider
@@ -245,6 +234,7 @@ async function connectWallet(){
           if(!switchError){
             document.getElementById('connect-button-div').style.display = 'none';
             document.getElementById('donate-form-card').style.display = 'block';
+
             window.ethereum.on('chainChanged', (chainId) => {
                 if(chainId !== '0x89'){
                     window.location.reload();
@@ -253,11 +243,7 @@ async function connectWallet(){
 
             // get MATIC Balance
             await web3.eth.getBalance(accounts[0]).then((res,er) => {
-                //console.log(res);
-                //console.log(er);
-
                 MATICBalance = web3.utils.fromWei(res, "ether");
-                //console.log("MATIC Balance: "+MATICBalance);
             });
 
             // get DAI Balance
@@ -270,7 +256,6 @@ async function connectWallet(){
           }
       }
       catch(e){
-          console.log(e.message);
           document.getElementById("connect-error").innerHTML = e.message;
           didError = true;
       }
